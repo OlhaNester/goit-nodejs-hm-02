@@ -1,10 +1,15 @@
 const { Contact } = require("../../models");
 const createError = require("Http-errors");
 
-const updateContact = async (req, res) => {
+const updateStatusContact = async (req, res) => {
   const { id } = req.params;
+  const { favorite } = req.body;
+  const result = await Contact.findByIdAndUpdate(
+    id,
+    { favorite },
+    { new: true }
+  );
 
-  const result = await Contact.findByIdAndUpdate(id, req.body, { new: true });
   if (!result) {
     throw createError(404, `Product with id=${id} is not found`);
   }
@@ -15,4 +20,4 @@ const updateContact = async (req, res) => {
   });
 };
 
-module.exports = updateContact;
+module.exports = updateStatusContact;
