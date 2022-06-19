@@ -2,8 +2,10 @@ const { Conflict } = require("Http-errors");
 // const bcrypt = require("bcrypt");
 const { User } = require("../../models");
 
-const singup = async (req, res) => {
+const signup = async (req, res) => {
   const { email, password, subscription } = req.body;
+  console.log(req.body);
+
   const user = await User.findOne({ email });
   if (user) {
     throw new Conflict(`User with email: ${email} already exist`);
@@ -25,4 +27,4 @@ const singup = async (req, res) => {
   });
 };
 
-module.exports = singup;
+module.exports = signup;
