@@ -1,30 +1,42 @@
 const { Conflict } = require("Http-errors");
 const { User } = require("../../models");
 const gravatar = require("gravatar");
+const { v4 } = require("uuid");
+const { sendEmail } = require("../../helpers");
 
 const signup = async (req, res) => {
   const { email, password, subscription } = req.body;
-  console.log(req.body);
 
   const user = await User.findOne({ email });
   if (user) {
     throw new Conflict(`User with email: ${email} already exist`);
   }
-  //   const hashPassword = bcrypt.hashSync(password, bcrypt.genSaltSync(10));
-  //   const result = await User.create({
-  //     email,
-  //     password: hashPassword,
-  //     subscription,
-  //   });
+
   const avatarURL = gravatar.url(email);
-  const newUser = new User({ email, subscription, avatarURL });
+  const verificationToken = v4();
+  const newUser = new User({
+    email,
+    subscription,
+    avatarURL,
+    verificationToken,
+  });
   newUser.setPassword(password);
-  newUser.save();
+  await newUser.save();
+
+  const confirMail = {
+    to: email,
+    subject: "Подтверждение email",
+    html: `<a target = "_blank" href = "http://localhost:3000/api/users/verify/${verificationToken}">Подтвердить email</a>`,
+  };
+
+  await sendEmail(confirMail);
 
   res.status(201).json({
     status: "success",
     code: 201,
-    data: { user: { email, password, subscription, avatarURL } },
+    data: {
+      user: { email, password, subscription, avatarURL, verificationToken },
+    },
   });
 };
 
